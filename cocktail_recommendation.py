@@ -7,18 +7,17 @@ db = client.ia
 collection = db['cocktails']
 documents = list(collection.find())
 
-keys_to_preserve = ['cocktailDbId', 'name', 'type', 'glass', 'IBA']
-
+keys_to_preserve = ['cocktailDbId', 'name', 'type', 'glass', 'IBA', 'image']
 
 ## Filter relevant properties, which is the ingredients plus glass, type, and IBA category
 def get_relevant_keys(docs):
-    non_relevant_keys = ['_id', 'instructions', 'image', 'IBA', 'name', 'type', '']
+    non_relevant_keys = ['_id', 'instructions', 'IBA', 'name', '']
     keys = [list(document.keys()) for document in documents]
     unique_keys = list(set([item for sublist in keys for item in sublist]))
     for key in non_relevant_keys:
-        unique_keys.remove(key);
+        unique_keys.remove(key)
 
-    return unique_keys;
+    return unique_keys
 
 
 ## Transform property value into a normalized numeric value
@@ -48,13 +47,20 @@ data = create_data_matrix(unique_keys)
 import pandas as pd
 import numpy as np
 
-categorical_columns = ['glass']
+categorical_columns = ['glass', 'type']
 
 database = pd.DataFrame(data, columns=unique_keys)
+types = database['type']
+images = get_images(list(database['image']))
 database = pd.get_dummies(database, columns=categorical_columns)
 
+
 ids = database['cocktailDbId'].astype(int)
-database = database.drop(['cocktailDbId'], axis=1)
+database = database.drop(['cocktailDbId', 'image'], axis=1)
+
+from sklearn.manifold import TSNE
+tsne = TSNE(n_components=2, init='random',learning_rate=0.3, n_iter=1000)
+database = tsne.fit_transform(database)
 
 X, y = database, ids
 
@@ -70,6 +76,6 @@ def recommend(drink_id, num_recommendations = 6):
     recommendation_indexes = recommender.kneighbors(query, n_neighbors=num_recommendations + 1)[:][1][0]
 
     import json
-    recommendations = {"recommendations": list(ids.iloc[recommendation_indexes].astype(str))}
+    # recommendations = {"recommendations": list(ids.iloc[recommendation_indexes].astype(str))}
 
-    return json.dumps(recommendations)
+    return list(ids.iloc[recommendation_indexes])
