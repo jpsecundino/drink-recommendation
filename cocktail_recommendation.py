@@ -1,4 +1,5 @@
 import pymongo
+from sklearn.neighbors import KNeighborsClassifier
 
 client = pymongo.MongoClient("mongodb+srv://colab:colab123@cluster1.sfizu.mongodb.net/?retryWrites=true&w=majority")
 db = client.ia
@@ -55,21 +56,18 @@ database = pd.get_dummies(database, columns=categorical_columns)
 ids = database['cocktailDbId'].astype(int)
 database = database.drop(['cocktailDbId'], axis=1)
 
+X, y = database, ids
+
+recommender = KNeighborsClassifier()
+recommender.fit(X, y)
+
 """## Recomendando drinks"""
-
-
 def recommend(drink_id, num_recommendations = 6):
-    filter = ids != drink_id
-    X, y = database[filter], ids[filter]
+    filter = ids == drink_id
 
-    query = database[np.logical_not(filter)]
+    query = database[filter]
 
-    from sklearn.neighbors import KNeighborsClassifier
-
-    recommender = KNeighborsClassifier(n_neighbors=num_recommendations)
-    recommender.fit(X, y)
-
-    recommendation_indexes = recommender.kneighbors(query)[:][1][0]
+    recommendation_indexes = recommender.kneighbors(query, n_neighbors=num_recommendations + 1)[:][1][0]
 
     import json
     recommendations = {"recommendations": list(ids.iloc[recommendation_indexes].astype(str))}
