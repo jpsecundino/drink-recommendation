@@ -11,7 +11,7 @@ keys_to_preserve = ['cocktailDbId', 'name', 'type', 'glass', 'IBA']
 
 ## Filter relevant properties, which is the ingredients plus glass, type, and IBA category
 def get_relevant_keys(docs):
-    non_relevant_keys = ['_id', 'instructions', 'image', 'IBA', 'name', '']
+    non_relevant_keys = ['_id', 'instructions', 'image', 'IBA', 'name', 'type', '']
     keys = [list(document.keys()) for document in documents]
     unique_keys = list(set([item for sublist in keys for item in sublist]))
     for key in non_relevant_keys:
