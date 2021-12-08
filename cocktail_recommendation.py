@@ -47,7 +47,7 @@ data = create_data_matrix(unique_keys)
 import pandas as pd
 import numpy as np
 
-categorical_columns = ['glass', 'type']
+categorical_columns = ['glass']
 
 database = pd.DataFrame(data, columns=unique_keys)
 database = pd.get_dummies(database, columns=categorical_columns)
