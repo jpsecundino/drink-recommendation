@@ -12,3 +12,4 @@ six==1.16.0
 sklearn==0.0
 threadpoolctl==3.0.0
 gunicorn==0.17.2
+flask==2.0.2
