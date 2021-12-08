@@ -1,7 +1,7 @@
 import pymongo
 
-client = pymongo.MongoClient("mongodb+srv://colab:colab123@cluster0.sfizu.mongodb.net/?retryWrites=true&w=majority")
-db = client.test
+client = pymongo.MongoClient("mongodb+srv://colab:colab123@cluster1.sfizu.mongodb.net/?retryWrites=true&w=majority")
+db = client.ia
 
 collection = db['cocktails']
 documents = list(collection.find())
@@ -58,7 +58,7 @@ database = database.drop(['cocktailDbId'], axis=1)
 """## Recomendando drinks"""
 
 
-def recommend(drink_id):
+def recommend(drink_id, num_recommendations = 6):
     filter = ids != drink_id
     X, y = database[filter], ids[filter]
 
@@ -66,7 +66,7 @@ def recommend(drink_id):
 
     from sklearn.neighbors import KNeighborsClassifier
 
-    recommender = KNeighborsClassifier(n_neighbors=5)
+    recommender = KNeighborsClassifier(n_neighbors=num_recommendations)
     recommender.fit(X, y)
 
     recommendation_indexes = recommender.kneighbors(query)[:][1][0]
