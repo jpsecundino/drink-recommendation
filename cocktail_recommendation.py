@@ -7,7 +7,7 @@ db = client.ia
 collection = db['cocktails']
 documents = list(collection.find())
 
-keys_to_preserve = ['cocktailDbId', 'name', 'type', 'glass', 'IBA', 'image']
+keys_to_preserve = ['cocktailDbId', 'name', 'type', 'glass', 'IBA']
 
 ## Filter relevant properties, which is the ingredients plus glass, type, and IBA category
 def get_relevant_keys(docs):
@@ -50,8 +50,6 @@ import numpy as np
 categorical_columns = ['glass', 'type']
 
 database = pd.DataFrame(data, columns=unique_keys)
-types = database['type']
-images = get_images(list(database['image']))
 database = pd.get_dummies(database, columns=categorical_columns)
 
 
@@ -76,6 +74,6 @@ def recommend(drink_id, num_recommendations = 6):
     recommendation_indexes = recommender.kneighbors(query, n_neighbors=num_recommendations + 1)[:][1][0]
 
     import json
-    # recommendations = {"recommendations": list(ids.iloc[recommendation_indexes].astype(str))}
+    recommendations = {"recommendations": list(ids.iloc[recommendation_indexes].astype(str))}
 
-    return list(ids.iloc[recommendation_indexes])
+    return json.dumps(recommendations)
