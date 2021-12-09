@@ -11,7 +11,7 @@ keys_to_preserve = ['cocktailDbId', 'name', 'type', 'glass', 'IBA']
 
 ## Filter relevant properties, which is the ingredients plus glass, type, and IBA category
 def get_relevant_keys(docs):
-    non_relevant_keys = ['_id', 'instructions', 'IBA', 'name', '']
+    non_relevant_keys = ['_id', 'instructions', 'IBA', 'name', 'image', '']
     keys = [list(document.keys()) for document in documents]
     unique_keys = list(set([item for sublist in keys for item in sublist]))
     for key in non_relevant_keys:
@@ -50,11 +50,12 @@ import numpy as np
 categorical_columns = ['glass', 'type']
 
 database = pd.DataFrame(data, columns=unique_keys)
+database['glass'] = database['glass'].str.lower()
 database = pd.get_dummies(database, columns=categorical_columns)
 
 
 ids = database['cocktailDbId'].astype(int)
-database = database.drop(['cocktailDbId', 'image'], axis=1)
+database = database.drop(['cocktailDbId'], axis=1)
 
 from sklearn.manifold import TSNE
 tsne = TSNE(n_components=2, init='random',learning_rate=0.3, n_iter=1000)
@@ -72,8 +73,11 @@ def recommend(drink_id, num_recommendations = 6):
     query = database[filter]
 
     recommendation_indexes = recommender.kneighbors(query, n_neighbors=num_recommendations + 1)[:][1][0]
-
+    
+    ans = list(ids.iloc[recommendation_indexes])
+    ans.remove(drink_id)
+    
     import json
-    recommendations = {"recommendations": list(ids.iloc[recommendation_indexes].astype(str))}
+    recommendations = {"recommendations": [str(id) for id in ans]}
 
     return json.dumps(recommendations)
